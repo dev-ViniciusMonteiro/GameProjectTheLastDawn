@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Playercontroller : MonoBehaviour
 {
+    private int ParamSpeed = Animator.StringToHash("speed");
+    private int ParamJump = Animator.StringToHash("jump");
+
     public float speedForce = 12.0f;
 
     public bool isGrounded = false;
@@ -14,6 +17,8 @@ public class Playercontroller : MonoBehaviour
 
     public Vector2 _moviment = Vector2.zero;
     private Rigidbody2D _body = null;
+    private Animator _animation = null;
+    private SpriteRenderer _render = null;
 
 
     public Vector2 velocity;
@@ -22,6 +27,8 @@ public class Playercontroller : MonoBehaviour
     private void Awake()
     {
         _body = GetComponent<Rigidbody2D>();
+        _animation = GetComponent<Animator>();
+        _render = GetComponent<SpriteRenderer>();
     }
 
 
@@ -38,10 +45,23 @@ public class Playercontroller : MonoBehaviour
 
         _moviment = new Vector2(Input.GetAxisRaw("Horizontal") * speedForce, 0.0f);
 
-        if (Input.GetButtonDown("Jump")&&isGrounded)
+        if (_moviment.sqrMagnitude > 0.1f)
+        {
+            bool xRight = Input.GetAxis("Horizontal") > 0;
+            if (_render.flipX == xRight)
+                _render.flipX = !xRight;
+        }
+
+            if (Input.GetButtonDown("Jump")&&isGrounded)
         {
             _body.AddForce(Vector2.up*5, ForceMode2D.Impulse);
         }
+
+        _animation.SetBool(ParamJump, isGrounded);
+
+        float speed = Mathf.Abs(_body.velocity.x);
+        _animation.SetFloat(ParamSpeed, speed);
+
     }
 
     private void FixedUpdate()
